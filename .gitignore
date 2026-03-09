@@ -1,0 +1,9 @@
+# Environment files - API keys hide karo
+.env
+agents/venv/
+node_modules/
+client/node_modules/
+server/node_modules/
+__pycache__/
+*.pyc
+.DS_Store
