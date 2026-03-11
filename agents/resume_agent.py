@@ -1,4 +1,3 @@
-from crewai import Agent, Task, Crew
 from groq import Groq
 import PyPDF2
 import os
