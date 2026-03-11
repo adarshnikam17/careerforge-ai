@@ -1,6 +1,6 @@
-crewai
 groq
 pypdf2
 python-dotenv
 fastapi
 uvicorn
+requests
