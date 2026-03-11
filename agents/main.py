@@ -7,16 +7,32 @@ from action_planner_agent import create_action_plan
 import shutil
 import os
 import json
+import re
 
 app = FastAPI()
 
-# CORS — React se connect hone ke liye
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["*"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ─── Helper: Safe JSON Parse ─────────────────────
+def safe_json_parse(text):
+    try:
+        # Direct parse try karo
+        return json.loads(text)
+    except:
+        try:
+            # JSON block nikalo agar markdown me wrapped hai
+            match = re.search(r'\{.*\}', text, re.DOTALL)
+            if match:
+                return json.loads(match.group())
+        except:
+            pass
+    return {}
 
 # ─── Resume Upload & Analyze Route ───────────────
 @app.post("/analyze-resume")
@@ -72,44 +88,48 @@ async def create_plan_route(
 
     return {"status": "success", "data": result}
 
-# ─── Full Pipeline Route (Sabka Ek Saath) ────────
+# ─── Full Pipeline Route ─────────────────────────
 @app.post("/full-analysis")
 async def full_analysis_route(
     file: UploadFile = File(...),
     target_role: str = Form(...),
     location: str = Form("India")
 ):
-    # Step 1: Resume analyze karo
-    temp_path = f"temp_{file.filename}"
-    with open(temp_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+    try:
+        # Step 1: Resume analyze karo
+        temp_path = f"temp_{file.filename}"
+        with open(temp_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
 
-    resume_result = analyze_resume(temp_path)
-    os.remove(temp_path)
-    resume_data = json.loads(resume_result)
+        resume_result = analyze_resume(temp_path)
+        os.remove(temp_path)
+        resume_data = safe_json_parse(resume_result)
 
-    # Step 2: Jobs fetch karo
-    skills = resume_data.get("skills", [])
-    jobs = fetch_jobs(target_role, location)
-    jobs_analysis = analyze_jobs(jobs, skills)
-    jobs_data = json.loads(jobs_analysis)
+        # Step 2: Jobs fetch karo
+        skills = resume_data.get("skills", [])
+        jobs = fetch_jobs(target_role, location)
+        jobs_analysis_raw = analyze_jobs(jobs, skills)
+        jobs_data = safe_json_parse(jobs_analysis_raw)
 
-    # Step 3: Gap analyze karo
-    gap_result = analyze_gaps(resume_data, jobs_data)
-    gap_data = json.loads(gap_result)
+        # Step 3: Gap analyze karo
+        gap_result = analyze_gaps(resume_data, jobs_data)
+        gap_data = safe_json_parse(gap_result)
 
-    # Step 4: Action plan banao
-    plan_result = create_action_plan(resume_data, gap_data, target_role)
-    plan_data = json.loads(plan_result)
+        # Step 4: Action plan banao
+        plan_result = create_action_plan(resume_data, gap_data, target_role)
+        plan_data = safe_json_parse(plan_result)
 
-    return {
-        "status": "success",
-        "resume": resume_data,
-        "jobs": jobs,
-        "jobs_analysis": jobs_data,
-        "gap_analysis": gap_data,
-        "action_plan": plan_data
-    }
+        return {
+            "status": "success",
+            "resume": resume_data,
+            "jobs": jobs,
+            "jobs_analysis": jobs_data,
+            "gap_analysis": gap_data,
+            "action_plan": plan_data
+        }
+
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 # ─── Health Check ────────────────────────────────
 @app.get("/")
