@@ -4,6 +4,7 @@ import AgentThinking from "../components/AgentThinking";
 import GapReport from "../components/GapReport";
 import ActionPlan from "../components/ActionPlan";
 import { fullAnalysis } from "../services/api";
+import PDFExport from "../components/PDFExport";
 
 const Home = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -130,22 +131,29 @@ const Home = () => {
 
             {/* Result Header */}
             <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-white text-2xl font-bold">
-                  ✅ Analysis Complete!
-                </h2>
-                <p className="text-gray-400 text-sm mt-1">
-                  Hi {result.resume?.name} — here is your full career report
-                </p>
-              </div>
-              <button
-                onClick={() => window.location.reload()}
-                className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm border border-gray-700 transition-all"
-              >
-                ← Analyze Again
-              </button>
-            </div>
-
+  <div>
+    <h2 className="text-white text-2xl font-bold">
+      ✅ Analysis Complete!
+    </h2>
+    <p className="text-gray-400 text-sm mt-1">
+      Hi {result.resume?.name} — here is your full career report
+    </p>
+  </div>
+  <div className="flex items-center gap-3">
+    <PDFExport
+      resumeData={result.resume}
+      gapData={result.gap_analysis}
+      planData={result.action_plan}
+      targetRole={result.action_plan?.target_role || ""}
+    />
+    <button
+      onClick={() => window.location.reload()}
+      className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm border border-gray-700 transition-all"
+    >
+      ← Analyze Again
+    </button>
+  </div>
+</div>
             {/* Tabs */}
             <div className="flex gap-2 mb-6 bg-gray-800/50 p-1 rounded-xl w-fit">
               <button
