@@ -20,7 +20,7 @@ const agentColors = {
 
 const AgentThinking = ({ isLoading }) => {
   const [visibleSteps, setVisibleSteps] = useState([]);
-  const [currentStep, setCurrentStep] = useState(0);
+  const [, setCurrentStep] = useState(0);
 
   useEffect(() => {
     if (!isLoading) {

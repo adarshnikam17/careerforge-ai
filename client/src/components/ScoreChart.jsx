@@ -1,4 +1,4 @@
-import { RadialBarChart, RadialBar, PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 
 // ─── Circular Score Card ──────────────────────
 const CircularScore = ({ value, max, label, color }) => {
