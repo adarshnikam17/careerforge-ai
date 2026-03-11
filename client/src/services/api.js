@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:8000';
+const BASE_URL = 'https://careerforge-ai-backend.onrender.com';
 
 // ─── Resume Analyze ───────────────────────────
 export const analyzeResume = async (file) => {
